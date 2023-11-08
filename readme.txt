@@ -1,5 +1,4 @@
-Install and run pigpiod:
-http://abyz.me.uk/rpi/pigpio/download.html
+Clone this repo
+cd to the directory and run: 'sudo ./install.sh'
 
-Add to crontab -e:
-* * * * * ~/workspace/vfan/vfan.sh >/dev/null 2>&1
+Note: this uses BCM pin 18 for Hardware PWM

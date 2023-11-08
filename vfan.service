@@ -1,0 +1,9 @@
+[Unit]
+Description=Fan Control service
+After=multi-user.target
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /usr/local/bin/vfan.py
+[Install]
+WantedBy=multi-user.target
