@@ -1,34 +1,43 @@
 #!/usr/bin/python3
-from gpiozero import CPUTemperature
-import pigpio
+import RPi.GPIO as GPIO
+import time
+
+CPU_TEMP='/sys/class/thermal/thermal_zone0/temp'
 
 MAX_TEMP = 77.0
-MIN_TEMP = 70.0
-MAX_DUTY = 255
-MIN_DUTY = 100
+MIN_TEMP = 60.0
+MAX_DUTY = 100
+MIN_DUTY = 20
 OFF_DUTY = 0
-PWM_FREQ = 10
-FAN_GPIO = 4
+PWM_FREQ = 100
+FAN_GPIO = 18
 
-pi = pigpio.pi()
-if pi.connected:
-    cpu = CPUTemperature()
+def get_cpu_temp() -> float:
+    return float(open(CPU_TEMP, 'r').readline()) / 1000
 
-    f = open("temp.log", 'a')
-    f.write("{}\n".format(cpu.temperature))
-    f.close()
-
+def calculate_duty_cycle(temperature: float) -> int:
+    print(temperature)
     duty = 0
-    if cpu.temperature >= MAX_TEMP:
+    if temperature >= MAX_TEMP:
         duty = MAX_DUTY
-    elif cpu.temperature <= MIN_TEMP:
+    elif temperature <= MIN_TEMP:
         duty = OFF_DUTY
     else:
-        duty = (cpu.temperature - MIN_TEMP) / (MAX_TEMP - MIN_TEMP) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY
+        duty = round((temperature - MIN_TEMP) / (MAX_TEMP - MIN_TEMP) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY)
+    print(duty)
+    return duty
 
-    pi.set_PWM_frequency(FAN_GPIO, PWM_FREQ)
-    pi.set_PWM_dutycycle(FAN_GPIO, duty)
-else:
-    f = open("temp.log", 'a')
-    f.write("No pigpiod...,\n")
-    f.close()
+
+if __name__ == "__main__":
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(FAN_GPIO, GPIO.OUT)
+    pwm = GPIO.PWM(FAN_GPIO, PWM_FREQ)
+    print("Starting fan...")
+    pwm.start(calculate_duty_cycle(get_cpu_temp()))
+    try:
+        while True:
+            time.sleep(5)
+            pwm.ChangeDutyCycle(calculate_duty_cycle(get_cpu_temp()))
+    except KeyboardInterrupt:
+        print("Terminated")
+    GPIO.cleanup()
