@@ -7,9 +7,9 @@ CPU_TEMP='/sys/class/thermal/thermal_zone0/temp'
 MAX_TEMP = 77.0
 MIN_TEMP = 60.0
 MAX_DUTY = 100
-MIN_DUTY = 20
+MIN_DUTY = 30
 OFF_DUTY = 0
-PWM_FREQ = 100
+PWM_FREQ = 10
 FAN_GPIO = 18
 
 def get_cpu_temp() -> float:
