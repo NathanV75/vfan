@@ -12,6 +12,8 @@ OFF_DUTY = 0
 PWM_FREQ = 10
 FAN_GPIO = 18
 
+USE_PWM = True
+
 def get_cpu_temp() -> float:
     return float(open(CPU_TEMP, 'r').readline()) / 1000
 
@@ -27,12 +29,9 @@ def calculate_duty_cycle(temperature: float) -> int:
     print(duty)
     return duty
 
-
-if __name__ == "__main__":
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(FAN_GPIO, GPIO.OUT)
+def pwm_loop():
     pwm = GPIO.PWM(FAN_GPIO, PWM_FREQ)
-    print("Starting fan...")
+    print("Starting PWM fan...")
     pwm.start(calculate_duty_cycle(get_cpu_temp()))
     try:
         while True:
@@ -40,4 +39,32 @@ if __name__ == "__main__":
             pwm.ChangeDutyCycle(calculate_duty_cycle(get_cpu_temp()))
     except KeyboardInterrupt:
         print("Terminated")
+    pwm.stop()
+
+def toggle_loop():
+    """
+    Toggles the fan on and off. Turns on at MAX_TEMP and stays on until it cools to MIN_TEMP.
+    """
+    print("Starting dynamic fan...")
+    fan_on = False
+    try:
+        while True:
+            temp = get_cpu_temp()
+            if temp >= MAX_TEMP:
+                GPIO.output(FAN_GPIO, GPIO.HIGH)
+                fan_on = True
+            elif fan_on and temp < MIN_TEMP:
+                GPIO.output(FAN_GPIO, GPIO.LOW)
+                fan_on = False
+            time.sleep(5)
+    except KeyboardInterrupt:
+        print("Terminated")
+
+if __name__ == "__main__":
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(FAN_GPIO, GPIO.OUT)
+    if USE_PWM:
+        pwm_loop()
+    else:
+        toggle_loop()
     GPIO.cleanup()
