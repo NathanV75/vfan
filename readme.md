@@ -5,8 +5,9 @@ Note: this uses BCM pin 18 for Hardware PWM by default.
 
 ## Installation
 To install vfan as a systemd service use the following steps.
-1. Run `vfan.py` with `python3 ./vfan.py`.
-1. Adjust parameters like FAN_GPIO and PWM_FREQ and restart the script as needed.
+1. Install pigpio. Instructions available [here](https://abyz.me.uk/rpi/pigpio/download.html).
+1. (OPTIONAL) Run `vfan.py` with `python3 ./vfan.py`.
+1. (OPTIONAL) Adjust parameters like FAN_GPIO and PWM_FREQ and restart the script as needed. You may wish to set `TEST=True` for this
 1. When you are happy with the settings `sudo ./install.sh`.
 1. That's it, vfan should now be running as a service.
 
